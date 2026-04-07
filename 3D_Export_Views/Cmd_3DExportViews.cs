@@ -13,9 +13,13 @@ namespace _3D_Export_Views
         private static CreateViewsHandler _createHandler;
         private static ExternalEvent _activateEvent;
         private static ActivateViewHandler _activateHandler;
+        private static ExternalEvent _refreshEvent;
+        private static RefreshHandler _refreshHandler;
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
+            Debug.WriteLine("[Cmd_3DExportViews] Execute started");
+
             UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
@@ -23,6 +27,7 @@ namespace _3D_Export_Views
             // If window already exists and is visible, just focus it
             if (_window != null && _window.IsVisible)
             {
+                Debug.WriteLine("[Cmd_3DExportViews] Window already visible — activating");
                 _window.Activate();
                 return Result.Succeeded;
             }
@@ -31,13 +36,16 @@ namespace _3D_Export_Views
             List<ViewPlan> plans = new FilteredElementCollector(doc)
                 .OfClass(typeof(ViewPlan))
                 .Cast<ViewPlan>()
-                .Where(v => !v.IsTemplate
-                    && (v.ViewType == ViewType.FloorPlan || v.ViewType == ViewType.CeilingPlan))
-                .OrderBy(v => v.Name)
+                .Where(viewPlan => !viewPlan.IsTemplate
+                    && (viewPlan.ViewType == ViewType.FloorPlan || viewPlan.ViewType == ViewType.CeilingPlan))
+                .OrderBy(viewPlan => viewPlan.Name)
                 .ToList();
+
+            Debug.WriteLine($"[Cmd_3DExportViews] Found {plans.Count} plans");
 
             if (plans.Count == 0)
             {
+                Debug.WriteLine("[Cmd_3DExportViews] No plans found — cancelled");
                 TaskDialog.Show("3D Export Views", "No floor plans or ceiling plans found in the current document.");
                 return Result.Cancelled;
             }
@@ -46,15 +54,15 @@ namespace _3D_Export_Views
             List<View3D> templates = new FilteredElementCollector(doc)
                 .OfClass(typeof(View3D))
                 .Cast<View3D>()
-                .Where(v => v.IsTemplate)
-                .OrderBy(v => v.Name)
+                .Where(view3d => view3d.IsTemplate)
+                .OrderBy(view3d => view3d.Name)
                 .ToList();
 
             // Find the 3D ViewFamilyType
-            ElementId vftId = new FilteredElementCollector(doc)
+            ElementId viewFamilyTypeId = new FilteredElementCollector(doc)
                 .OfClass(typeof(ViewFamilyType))
                 .Cast<ViewFamilyType>()
-                .First(vft => vft.ViewFamily == ViewFamily.ThreeDimensional)
+                .First(familyType => familyType.ViewFamily == ViewFamily.ThreeDimensional)
                 .Id;
 
             // Create handlers and ExternalEvents (once)
@@ -70,8 +78,14 @@ namespace _3D_Export_Views
                 _activateEvent = ExternalEvent.Create(_activateHandler);
             }
 
+            if (_refreshHandler == null)
+            {
+                _refreshHandler = new RefreshHandler();
+                _refreshEvent = ExternalEvent.Create(_refreshHandler);
+            }
+
             // Store the ViewFamilyTypeId on the handler
-            _createHandler.ViewFamilyTypeId = vftId;
+            _createHandler.ViewFamilyTypeId = viewFamilyTypeId;
 
             // Create and show the modeless window
             _window = new ExportViewsWindow(
@@ -79,10 +93,15 @@ namespace _3D_Export_Views
                 _createHandler,
                 _activateEvent,
                 _activateHandler,
+                _refreshEvent,
+                _refreshHandler,
                 plans,
                 templates);
 
             _window.Show();
+
+            Debug.WriteLine($"[Cmd_3DExportViews] Window shown — {plans.Count} plans, "
+                + $"{templates.Count} templates, ViewFamilyTypeId={viewFamilyTypeId}");
 
             return Result.Succeeded;
         }

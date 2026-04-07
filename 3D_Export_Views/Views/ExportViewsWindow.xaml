@@ -3,8 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="3D Export Views"
         Width="450" Height="650"
+        MinHeight="450" MinWidth="600"
+        ResizeMode="CanResize"
+        Topmost="True"
         WindowStartupLocation="CenterScreen"
-        ResizeMode="NoResize">
+       >
 
     <Grid Margin="12">
         <Grid.RowDefinitions>
@@ -16,67 +19,127 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Search / Filter -->
-        <TextBlock Grid.Row="0" Text="Select Floor/Ceiling Plans:" FontWeight="SemiBold" Margin="0,0,0,4"/>
-        <TextBox Grid.Row="1" x:Name="tbSearch"
-                 TextChanged="TbSearch_TextChanged"
-                 Margin="0,0,0,4">
-            <TextBox.Style>
-                <Style TargetType="TextBox">
-                    <Style.Triggers>
-                        <Trigger Property="Text" Value="">
-                            <Setter Property="Background">
-                                <Setter.Value>
-                                    <VisualBrush AlignmentX="Left" AlignmentY="Center" Stretch="None">
-                                        <VisualBrush.Visual>
-                                            <Label Content="Search views..." Foreground="Gray" Padding="4,0,0,0"/>
-                                        </VisualBrush.Visual>
-                                    </VisualBrush>
-                                </Setter.Value>
-                            </Setter>
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </TextBox.Style>
-        </TextBox>
+        <!-- Label + live selection count -->
+        <Grid Grid.Row="0" Margin="0,0,0,4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Select Floor/Ceiling Plans:" FontWeight="SemiBold" VerticalAlignment="Center"/>
+            <TextBlock Grid.Column="1" x:Name="tbSelectionCount"
+                       Foreground="Gray" FontStyle="Italic" VerticalAlignment="Center"/>
+        </Grid>
+        <Grid Grid.Row="1" Margin="0,0,0,4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0" x:Name="tbSearch"
+                     TextChanged="TbSearch_TextChanged"
+                     Margin="0,0,4,0">
+                <TextBox.Style>
+                    <Style TargetType="TextBox">
+                        <Style.Triggers>
+                            <Trigger Property="Text" Value="">
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <VisualBrush AlignmentX="Left" AlignmentY="Center" Stretch="None">
+                                            <VisualBrush.Visual>
+                                                <Label Content="Search views..." Foreground="Gray" Padding="4,0,0,0"/>
+                                            </VisualBrush.Visual>
+                                        </VisualBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBox.Style>
+            </TextBox>
+            <!-- U+21BB = ↻ Clockwise Open Circle Arrow (refresh icon) -->
+            <Button Grid.Column="1" x:Name="btnRefresh" Content="&#x21BB;"
+                    Click="BtnRefresh_Click"
+                    ToolTip="Refresh plans and templates from document"
+                    Padding="6,2" FontSize="14"/>
+        </Grid>
 
-        <!-- Views ListBox -->
-        <ListBox Grid.Row="2" x:Name="lbViews"
-                 SelectionMode="Extended"
-                 DisplayMemberPath="Name"
-                 Margin="0,0,0,4"/>
+        <!-- Views DataGrid -->
+        <DataGrid Grid.Row="2" x:Name="dgViews"
+                  AutoGenerateColumns="False"
+                  HeadersVisibility="Column"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  SelectionMode="Extended"
+                  GridLinesVisibility="Horizontal"
+                  RowHeaderWidth="0"
+                  IsReadOnly="False"
+                  Margin="0,0,0,4">
+            <DataGrid.Columns>
+                <!-- Checkbox column with Toggle-All header -->
+                <DataGridCheckBoxColumn
+                    Binding="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Width="42">
+                    <DataGridCheckBoxColumn.HeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <!-- U+2713 = ✓ Check Mark -->
+                            <Setter Property="Content" Value="&#x2713; All"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            <EventSetter Event="Click" Handler="HeaderToggleAll_Click"/>
+                        </Style>
+                    </DataGridCheckBoxColumn.HeaderStyle>
+                </DataGridCheckBoxColumn>
 
-        <!-- Select All / Deselect All -->
-        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,8">
-            <Button Content="Select All" Click="BtnSelectAll_Click" Padding="8,2" Margin="0,0,8,0"/>
-            <Button Content="Deselect All" Click="BtnDeselectAll_Click" Padding="8,2"/>
-        </StackPanel>
+                <DataGridTextColumn Header="Name"
+                                    Binding="{Binding Name}"
+                                    IsReadOnly="True"
+                                    Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
 
         <!-- Discipline -->
-        <TextBlock Grid.Row="4" Text="Discipline:" FontWeight="SemiBold" Margin="0,0,0,4"/>
-        <ComboBox Grid.Row="5" x:Name="cbDiscipline"
+        <TextBlock Grid.Row="3" Text="Discipline:" FontWeight="SemiBold" Margin="0,0,0,4"/>
+        <ComboBox Grid.Row="4" x:Name="cbDiscipline"
                   IsEditable="True"
                   Margin="0,0,0,8"/>
 
         <!-- View Template -->
-        <TextBlock Grid.Row="6" Text="View Template:" FontWeight="SemiBold" Margin="0,0,0,4"/>
-        <ComboBox Grid.Row="7" x:Name="cbTemplate"
+        <TextBlock Grid.Row="5" Text="View Template:" FontWeight="SemiBold" Margin="0,0,0,4"/>
+        <ComboBox Grid.Row="6" x:Name="cbTemplate"
                   DisplayMemberPath="Name"
                   Margin="0,0,0,8"/>
 
-        <!-- Create Button -->
-        <Button Grid.Row="8" x:Name="btnCreate" Content="Create"
-                Click="BtnCreate_Click"
-                Padding="12,6"
-                HorizontalAlignment="Left"
-                Margin="0,0,0,8"/>
+        <!-- Create Button + Progress -->
+        <Grid Grid.Row="7" Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" x:Name="btnCreate" Content="Create"
+                    Click="BtnCreate_Click"
+                    Padding="12,6"/>
+            <ProgressBar Grid.Column="1" x:Name="pbProgress"
+                         Minimum="0" Maximum="100" Value="0"
+                         Visibility="Collapsed"
+                         Height="16" Margin="8,0,8,0"/>
+            <TextBlock Grid.Column="2" x:Name="tbProgress"
+                       Visibility="Collapsed"
+                       VerticalAlignment="Center"
+                       FontStyle="Italic" Foreground="Gray"/>
+        </Grid>
 
         <!-- Results Section -->
-        <GroupBox Grid.Row="9" Header="Results" Margin="0,0,0,0">
+        <GroupBox Grid.Row="8" Margin="0,0,0,0">
+            <GroupBox.Header>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Results" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="tbResultCounts"
+                               Margin="8,0,0,0" VerticalAlignment="Center"
+                               Foreground="Gray" FontStyle="Italic"/>
+                </StackPanel>
+            </GroupBox.Header>
             <ListBox x:Name="lbResults"
                      BorderThickness="0"
                      MouseDoubleClick="LbResults_MouseDoubleClick">

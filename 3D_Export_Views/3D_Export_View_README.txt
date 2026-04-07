@@ -26,25 +26,38 @@ HOW TO USE
 3. In the window:
 
    a. SELECT VIEWS
-      - Browse the list of floor plans and ceiling plans
-      - Use the search box to filter by name
-      - Click to select one, or Ctrl+Click / Shift+Click for multiple
-      - Use "Select All" / "Deselect All" buttons for quick selection
+      - Browse the list of floor plans and ceiling plans in the DataGrid
+      - Use the search box to filter by name (case-insensitive)
+      - Click the checkbox on any row to select/deselect it
+      - Click the column header ("checkmark All") to toggle all visible rows
+      - Shift+Click a checkbox to select a range from the last clicked row
+      - When multiple rows are highlighted, clicking one checkbox
+        toggles all highlighted rows together
+      - The selection count ("X of Y selected") updates live
 
-   b. CHOOSE A DISCIPLINE
+   b. REFRESH
+      - Click the refresh button (circular arrow, next to search box)
+        to reload plans and templates from the current document
+      - Useful after adding new levels or views without reopening the tool
+
+   c. CHOOSE A DISCIPLINE
       - Pick from the dropdown: MECH, ELEC, PLUM, or ARCH
       - Or type your own custom label (e.g., "FP" for fire protection)
 
-   c. CHOOSE A VIEW TEMPLATE
+   d. CHOOSE A VIEW TEMPLATE
       - Pick a 3D view template from the dropdown
+      - Only 3D-compatible templates are listed
       - Or choose "<None>" to skip applying a template
 
 4. Click "Create" to generate the 3D views.
+   - A progress bar and counter ("3 / 49") show real-time progress
+   - The Create button is disabled while processing
 
 5. RESULTS appear at the bottom of the window:
-   - Each created view is listed by name
-   - Click any view name to jump to it in Revit
-   - If a view failed to create, you will see an error message
+   - A summary count shows "(X created, Y failed)"
+   - Each created view is listed with a green checkmark
+   - Failed views are listed with a red X and an error message
+   - Double-click any successful result to jump to that view in Revit
 
 6. The window stays open - you can make more selections and create
    additional views without reopening the tool.
@@ -78,3 +91,6 @@ NOTES
   uses the view's default extents.
 
 - All views created in one batch can be undone with a single Ctrl+Z in Revit.
+
+- If one view fails to create (e.g., due to a corrupt plan), the rest of
+  the batch continues. The failure is reported in the results list.

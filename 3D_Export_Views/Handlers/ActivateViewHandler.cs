@@ -1,3 +1,5 @@
+using System;
+
 namespace _3D_Export_Views.Handlers
 {
     public class ActivateViewHandler : IExternalEventHandler
@@ -7,15 +9,32 @@ namespace _3D_Export_Views.Handlers
 
         public void Execute(UIApplication app)
         {
-            if (ViewToActivate == null || ViewToActivate == ElementId.InvalidElementId)
-                return;
-
-            Document doc = app.ActiveUIDocument.Document;
-            View view = doc.GetElement(ViewToActivate) as View;
-
-            if (view != null)
+            try
             {
-                app.ActiveUIDocument.ActiveView = view;
+                if (ViewToActivate == null || ViewToActivate == ElementId.InvalidElementId)
+                {
+                    Debug.WriteLine("[ActivateViewHandler] Skipped — ViewToActivate is null or invalid");
+                    return;
+                }
+
+                Debug.WriteLine($"[ActivateViewHandler] Activating view with ElementId={ViewToActivate}");
+
+                Document doc = app.ActiveUIDocument.Document;
+                View view = doc.GetElement(ViewToActivate) as View;
+
+                if (view != null)
+                {
+                    app.ActiveUIDocument.ActiveView = view;
+                    Debug.WriteLine($"[ActivateViewHandler] Activated view: {view.Name}");
+                }
+                else
+                {
+                    Debug.WriteLine($"[ActivateViewHandler] WARNING: ElementId={ViewToActivate} did not resolve to a View");
+                }
+            }
+            catch (Exception exception)
+            {
+                Debug.WriteLine($"[ActivateViewHandler] UNHANDLED EXCEPTION: {exception}");
             }
         }
 

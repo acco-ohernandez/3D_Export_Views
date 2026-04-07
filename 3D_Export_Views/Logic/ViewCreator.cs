@@ -18,13 +18,19 @@ namespace _3D_Export_Views.Logic
             List<ViewPlan> sourcePlans,
             ElementId viewFamilyTypeId,
             ElementId templateId,
-            string discipline)
+            string discipline,
+            Action<int, int> onProgress = null)
         {
             var results = new List<ViewResult>();
+            int totalPlans = sourcePlans.Count;
+            int currentPlan = 0;
 
-            using (Transaction t = new Transaction(doc, "Create 3D Export Views"))
+            Debug.WriteLine($"[ViewCreator] CreateViews started — {totalPlans} plans, "
+                + $"ViewFamilyTypeId={viewFamilyTypeId}, TemplateId={templateId}, Discipline={discipline}");
+
+            using (Transaction transaction = new Transaction(doc, "Create 3D Export Views"))
             {
-                t.Start();
+                transaction.Start();
 
                 ViewOrientation3D orientation = GetDefaultOrientation(doc);
 
@@ -32,6 +38,8 @@ namespace _3D_Export_Views.Logic
                 {
                     try
                     {
+                        Debug.WriteLine($"[ViewCreator] Creating view for plan: {plan.Name} (Id={plan.Id})");
+
                         View3D view3d = CreateSingle3DView(doc, plan, viewFamilyTypeId, templateId, discipline, orientation);
                         results.Add(new ViewResult
                         {
@@ -39,21 +47,33 @@ namespace _3D_Export_Views.Logic
                             ViewName = view3d.Name,
                             Success = true
                         });
+
+                        Debug.WriteLine($"[ViewCreator] Created: {view3d.Name} (Id={view3d.Id})");
                     }
-                    catch (Exception ex)
+                    catch (Exception exception)
                     {
+                        string failedViewName = $"3D - {discipline} - {plan.GenLevel?.Name ?? plan.Name}";
+                        Debug.WriteLine($"[ViewCreator] FAILED for plan '{plan.Name}': {exception.Message}");
+
                         results.Add(new ViewResult
                         {
                             ViewId = ElementId.InvalidElementId,
-                            ViewName = $"3D - {discipline} - {plan.GenLevel?.Name ?? plan.Name}",
+                            ViewName = failedViewName,
                             Success = false,
-                            ErrorMessage = ex.Message
+                            ErrorMessage = exception.Message
                         });
                     }
+
+                    currentPlan++;
+                    onProgress?.Invoke(currentPlan, totalPlans);
                 }
 
-                t.Commit();
+                transaction.Commit();
             }
+
+            Debug.WriteLine($"[ViewCreator] CreateViews completed — "
+                + $"{results.Count(viewResult => viewResult.Success)} succeeded, "
+                + $"{results.Count(viewResult => !viewResult.Success)} failed");
 
             return results;
         }
@@ -92,16 +112,16 @@ namespace _3D_Export_Views.Logic
         {
             // Get XY extents from crop box, applying transform for rotated crops
             BoundingBoxXYZ cropBox = sourcePlan.CropBox;
-            Transform transform = cropBox.Transform;
+            Transform cropTransform = cropBox.Transform;
 
-            XYZ min = cropBox.Min;
-            XYZ max = cropBox.Max;
+            XYZ cropMin = cropBox.Min;
+            XYZ cropMax = cropBox.Max;
 
             // Transform crop box corners to model coordinates
-            XYZ corner1 = transform.OfPoint(new XYZ(min.X, min.Y, 0));
-            XYZ corner2 = transform.OfPoint(new XYZ(max.X, max.Y, 0));
-            XYZ corner3 = transform.OfPoint(new XYZ(min.X, max.Y, 0));
-            XYZ corner4 = transform.OfPoint(new XYZ(max.X, min.Y, 0));
+            XYZ corner1 = cropTransform.OfPoint(new XYZ(cropMin.X, cropMin.Y, 0));
+            XYZ corner2 = cropTransform.OfPoint(new XYZ(cropMax.X, cropMax.Y, 0));
+            XYZ corner3 = cropTransform.OfPoint(new XYZ(cropMin.X, cropMax.Y, 0));
+            XYZ corner4 = cropTransform.OfPoint(new XYZ(cropMax.X, cropMin.Y, 0));
 
             double minX = Math.Min(Math.Min(corner1.X, corner2.X), Math.Min(corner3.X, corner4.X));
             double minY = Math.Min(Math.Min(corner1.Y, corner2.Y), Math.Min(corner3.Y, corner4.Y));
@@ -113,52 +133,70 @@ namespace _3D_Export_Views.Logic
 
             ElementId topLevelId = viewRange.GetLevelId(PlanViewPlane.TopClipPlane);
             double topOffset = viewRange.GetOffset(PlanViewPlane.TopClipPlane);
-            double topZ = GetElevation(doc, topLevelId, sourcePlan) + topOffset;
+            double topElevation = GetElevation(doc, topLevelId, sourcePlan) + topOffset;
 
             ElementId bottomLevelId = viewRange.GetLevelId(PlanViewPlane.BottomClipPlane);
             double bottomOffset = viewRange.GetOffset(PlanViewPlane.BottomClipPlane);
-            double bottomZ = GetElevation(doc, bottomLevelId, sourcePlan) + bottomOffset;
+            double bottomElevation = GetElevation(doc, bottomLevelId, sourcePlan) + bottomOffset;
+
+            // Guard against inverted Z range (e.g., misconfigured view range)
+            if (bottomElevation > topElevation)
+            {
+                Debug.WriteLine($"[ViewCreator] WARNING: Inverted Z range for plan '{sourcePlan.Name}' — "
+                    + $"bottom={bottomElevation:F2}, top={topElevation:F2}. Swapping.");
+                (bottomElevation, topElevation) = (topElevation, bottomElevation);
+            }
+
+            Debug.WriteLine($"[ViewCreator] SectionBox for '{sourcePlan.Name}': "
+                + $"X=[{minX:F2}, {maxX:F2}], Y=[{minY:F2}, {maxY:F2}], Z=[{bottomElevation:F2}, {topElevation:F2}]");
 
             BoundingBoxXYZ sectionBox = new BoundingBoxXYZ();
-            sectionBox.Min = new XYZ(minX, minY, bottomZ);
-            sectionBox.Max = new XYZ(maxX, maxY, topZ);
+            sectionBox.Min = new XYZ(minX, minY, bottomElevation);
+            sectionBox.Max = new XYZ(maxX, maxY, topElevation);
 
             return sectionBox;
         }
 
         private static double GetElevation(Document doc, ElementId levelId, ViewPlan sourcePlan)
         {
-            double sourceLevelElev = sourcePlan.GenLevel.Elevation;
+            // Guard against null GenLevel (can happen with certain ceiling plans)
+            double sourceLevelElevation = sourcePlan.GenLevel?.Elevation ?? 0.0;
+            if (sourcePlan.GenLevel == null)
+            {
+                Debug.WriteLine($"[ViewCreator] WARNING: GenLevel is null for plan '{sourcePlan.Name}', using elevation=0.0");
+            }
 
             // PlanViewRange.Current — use the plan's own associated level
             if (levelId == PlanViewRange.Current)
             {
-                return sourceLevelElev;
+                return sourceLevelElevation;
             }
 
             // PlanViewRange.LevelAbove — find the next level above
             if (levelId == PlanViewRange.LevelAbove)
             {
-                Level above = GetAdjacentLevel(doc, sourceLevelElev, above: true);
-                return above != null ? above.Elevation : sourceLevelElev + 100.0;
+                Level levelAbove = GetAdjacentLevel(doc, sourceLevelElevation, above: true);
+                return levelAbove != null ? levelAbove.Elevation : sourceLevelElevation + 100.0;
             }
 
             // PlanViewRange.LevelBelow — find the next level below
             if (levelId == PlanViewRange.LevelBelow)
             {
-                Level below = GetAdjacentLevel(doc, sourceLevelElev, above: false);
-                return below != null ? below.Elevation : sourceLevelElev;
+                Level levelBelow = GetAdjacentLevel(doc, sourceLevelElevation, above: false);
+                return levelBelow != null ? levelBelow.Elevation : sourceLevelElevation;
             }
 
             // Explicit level ID
-            Level level = doc.GetElement(levelId) as Level;
-            if (level != null)
+            Level explicitLevel = doc.GetElement(levelId) as Level;
+            if (explicitLevel != null)
             {
-                return level.Elevation;
+                return explicitLevel.Elevation;
             }
 
             // Fallback
-            return sourceLevelElev;
+            Debug.WriteLine($"[ViewCreator] WARNING: Could not resolve levelId={levelId} for plan '{sourcePlan.Name}', "
+                + $"falling back to source level elevation={sourceLevelElevation:F2}");
+            return sourceLevelElevation;
         }
 
         private static Level GetAdjacentLevel(Document doc, double elevation, bool above)
@@ -166,33 +204,35 @@ namespace _3D_Export_Views.Logic
             List<Level> levels = new FilteredElementCollector(doc)
                 .OfClass(typeof(Level))
                 .Cast<Level>()
-                .OrderBy(l => l.Elevation)
+                .OrderBy(level => level.Elevation)
                 .ToList();
 
             if (above)
             {
-                return levels.FirstOrDefault(l => l.Elevation > elevation + 0.001);
+                return levels.FirstOrDefault(level => level.Elevation > elevation + 0.001);
             }
             else
             {
-                return levels.LastOrDefault(l => l.Elevation < elevation - 0.001);
+                return levels.LastOrDefault(level => level.Elevation < elevation - 0.001);
             }
         }
 
         private static ViewOrientation3D GetDefaultOrientation(Document doc)
         {
             // Try to copy orientation from the project's default {3D} view
-            View3D default3D = new FilteredElementCollector(doc)
+            View3D default3DView = new FilteredElementCollector(doc)
                 .OfClass(typeof(View3D))
                 .Cast<View3D>()
-                .FirstOrDefault(v => !v.IsTemplate && v.Name.Contains("{3D}"));
+                .FirstOrDefault(view => !view.IsTemplate && view.Name.Contains("{3D}"));
 
-            if (default3D != null)
+            if (default3DView != null)
             {
-                return default3D.GetOrientation();
+                Debug.WriteLine($"[ViewCreator] Using orientation from default 3D view: {default3DView.Name}");
+                return default3DView.GetOrientation();
             }
 
             // Fallback: construct a standard SE isometric orientation
+            Debug.WriteLine("[ViewCreator] No default {3D} view found — using fallback SE isometric orientation");
             XYZ forward = new XYZ(-1, 1, -1).Normalize();
             XYZ up = XYZ.BasisZ;
             XYZ eye = XYZ.Zero;
@@ -205,18 +245,23 @@ namespace _3D_Export_Views.Logic
                 new FilteredElementCollector(doc)
                     .OfClass(typeof(View))
                     .Cast<View>()
-                    .Select(v => v.Name));
+                    .Select(view => view.Name));
 
-            string name = baseName;
+            string candidateName = baseName;
             int counter = 1;
 
-            while (existingNames.Contains(name))
+            while (existingNames.Contains(candidateName))
             {
                 counter++;
-                name = $"{baseName} ({counter})";
+                candidateName = $"{baseName} ({counter})";
             }
 
-            return name;
+            if (counter > 1)
+            {
+                Debug.WriteLine($"[ViewCreator] Name collision: '{baseName}' already exists, using '{candidateName}'");
+            }
+
+            return candidateName;
         }
     }
 }
