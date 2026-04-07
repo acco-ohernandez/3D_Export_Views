@@ -8,7 +8,7 @@ Revit add-in that batch-creates 3D isometric views from selected floor/ceiling p
 
 ```
 Cmd_3DExportViews (IExternalCommand)
-  └─ Shows modeless ExportViewsWindow (singleton)
+  └─ Shows modeless _3DExportViews_Form (singleton)
        ├─ "Create"  → ExternalEvent → CreateViewsHandler → ViewCreator
        ├─ "Refresh"  → ExternalEvent → RefreshHandler → re-queries plans & templates
        └─ Click result → ExternalEvent → ActivateViewHandler
@@ -24,7 +24,7 @@ Cmd_3DExportViews (IExternalCommand)
 | File | Purpose |
 |------|---------|
 | `Cmd_3DExportViews.cs` | Command entry point. Creates/shows singleton window, sets up ExternalEvents. |
-| `Views/ExportViewsWindow.xaml(.cs)` | Modeless WPF UI — DataGrid with checkbox selection, search filter, discipline, template, progress bar, results display. |
+| `Views/_3DExportViews_Form.xaml(.cs)` | Modeless WPF UI — DataGrid with checkbox selection, search filter, discipline, template, progress bar, results display. |
 | `Logic/ViewCreator.cs` | Core logic — creates 3D views, section boxes, applies templates. Static methods, transaction-aware. |
 | `Handlers/CreateViewsHandler.cs` | `IExternalEventHandler` — bridges UI "Create" action to ViewCreator. Reports per-view progress. |
 | `Handlers/RefreshHandler.cs` | `IExternalEventHandler` — re-queries plans and templates from the active document. |
@@ -65,7 +65,7 @@ Cmd_3DExportViews (IExternalCommand)
 
 All files use `Debug.WriteLine()` with prefixed tags for tracing in the Visual Studio Output window:
 - `[Cmd_3DExportViews]` — command startup, plan/template counts
-- `[ExportViewsWindow]` — UI events (create, refresh, toggle-all, activate, close)
+- `[_3DExportViews_Form]` — UI events (create, refresh, toggle-all, activate, close)
 - `[CreateViewsHandler]` — handler entry/exit, exception fallback
 - `[RefreshHandler]` — handler entry/exit, counts
 - `[ActivateViewHandler]` — view activation, null/invalid guards

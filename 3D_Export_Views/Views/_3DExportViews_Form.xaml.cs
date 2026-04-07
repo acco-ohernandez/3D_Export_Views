@@ -13,7 +13,7 @@ using DataGridCell = System.Windows.Controls.DataGridCell;
 
 namespace _3D_Export_Views.Views
 {
-    public partial class ExportViewsWindow : Window
+    public partial class _3DExportViews_Form : Window
     {
         private readonly ExternalEvent _createEvent;
         private readonly CreateViewsHandler _createHandler;
@@ -27,7 +27,7 @@ namespace _3D_Export_Views.Views
         private int? _lastClickedIndex;
         private List<ResultItem> _results = new List<ResultItem>();
 
-        public ExportViewsWindow(
+        public _3DExportViews_Form(
             ExternalEvent createEvent,
             CreateViewsHandler createHandler,
             ExternalEvent activateEvent,
@@ -39,7 +39,7 @@ namespace _3D_Export_Views.Views
         {
             InitializeComponent();
 
-            Debug.WriteLine($"[ExportViewsWindow] Constructor — {plans.Count} plans, {templates.Count} templates");
+            Debug.WriteLine($"[_3DExportViews_Form] Constructor — {plans.Count} plans, {templates.Count} templates");
 
             _createEvent = createEvent;
             _createHandler = createHandler;
@@ -127,7 +127,7 @@ namespace _3D_Export_Views.Views
 
         private void BtnRefresh_Click(object sender, RoutedEventArgs args)
         {
-            Debug.WriteLine("[ExportViewsWindow] Refresh clicked");
+            Debug.WriteLine("[_3DExportViews_Form] Refresh clicked");
             btnRefresh.IsEnabled = false;
             _refreshEvent.Raise();
         }
@@ -136,7 +136,7 @@ namespace _3D_Export_Views.Views
         {
             Dispatcher.Invoke(() =>
             {
-                Debug.WriteLine($"[ExportViewsWindow] OnRefreshCompleted — {plans.Count} plans, {templates.Count} templates");
+                Debug.WriteLine($"[_3DExportViews_Form] OnRefreshCompleted — {plans.Count} plans, {templates.Count} templates");
 
                 // Clear search box so the filter doesn't hide refreshed items
                 tbSearch.Text = "";
@@ -175,7 +175,7 @@ namespace _3D_Export_Views.Views
             var visibleItems = _plansView.Cast<PlanItem>().ToList();
             bool anyUnchecked = visibleItems.Any(planItem => !planItem.IsSelected);
 
-            Debug.WriteLine($"[ExportViewsWindow] HeaderToggleAll — {visibleItems.Count} visible, "
+            Debug.WriteLine($"[_3DExportViews_Form] HeaderToggleAll — {visibleItems.Count} visible, "
                 + $"anyUnchecked={anyUnchecked}, setting all to {anyUnchecked}");
 
             foreach (var planItem in visibleItems)
@@ -215,7 +215,7 @@ namespace _3D_Export_Views.Views
                         int rangeEnd   = Math.Max(_lastClickedIndex.Value, clickedIndex);
                         newState       = !clickedItem.IsSelected;
 
-                        Debug.WriteLine($"[ExportViewsWindow] Shift+click range [{rangeStart}..{rangeEnd}] -> {newState}");
+                        Debug.WriteLine($"[_3DExportViews_Form] Shift+click range [{rangeStart}..{rangeEnd}] -> {newState}");
 
                         for (int rangeIndex = rangeStart; rangeIndex <= rangeEnd; rangeIndex++)
                             visibleItems[rangeIndex].IsSelected = newState;
@@ -230,7 +230,7 @@ namespace _3D_Export_Views.Views
                     // Toggle all highlighted rows to the opposite of the clicked row's state
                     newState = !clickedItem.IsSelected;
 
-                    Debug.WriteLine($"[ExportViewsWindow] Multi-select toggle — {highlightedItems.Count} items -> {newState}");
+                    Debug.WriteLine($"[_3DExportViews_Form] Multi-select toggle — {highlightedItems.Count} items -> {newState}");
 
                     foreach (var highlightedItem in highlightedItems)
                         highlightedItem.IsSelected = newState;
@@ -267,7 +267,7 @@ namespace _3D_Export_Views.Views
                 return;
             }
 
-            Debug.WriteLine($"[ExportViewsWindow] Create clicked — {selectedPlans.Count} plans, "
+            Debug.WriteLine($"[_3DExportViews_Form] Create clicked — {selectedPlans.Count} plans, "
                 + $"Discipline={discipline}, Template={selectedTemplate.Name}");
 
             // Set handler shared state
@@ -312,7 +312,7 @@ namespace _3D_Export_Views.Views
             // Dispatch to UI thread
             Dispatcher.Invoke(() =>
             {
-                Debug.WriteLine($"[ExportViewsWindow] OnViewsCreated — {results.Count} results");
+                Debug.WriteLine($"[_3DExportViews_Form] OnViewsCreated — {results.Count} results");
 
                 _results.Clear();
                 foreach (var viewResult in results)
@@ -334,7 +334,7 @@ namespace _3D_Export_Views.Views
                 int failedCount = _results.Count(result => !result.Success);
                 tbResultCounts.Text = $"({createdCount} created, {failedCount} failed)";
 
-                Debug.WriteLine($"[ExportViewsWindow] Results: {createdCount} created, {failedCount} failed");
+                Debug.WriteLine($"[_3DExportViews_Form] Results: {createdCount} created, {failedCount} failed");
 
                 btnCreate.IsEnabled = true;
                 pbProgress.Visibility = System.Windows.Visibility.Collapsed;
@@ -350,7 +350,7 @@ namespace _3D_Export_Views.Views
             if (selectedResult == null || !selectedResult.Success || selectedResult.ViewId == ElementId.InvalidElementId)
                 return;
 
-            Debug.WriteLine($"[ExportViewsWindow] Activating view: {selectedResult.ViewName} (Id={selectedResult.ViewId})");
+            Debug.WriteLine($"[_3DExportViews_Form] Activating view: {selectedResult.ViewName} (Id={selectedResult.ViewId})");
 
             _activateHandler.ViewToActivate = selectedResult.ViewId;
             _activateEvent.Raise();
@@ -361,7 +361,7 @@ namespace _3D_Export_Views.Views
             // Hide instead of close for singleton reuse
             args.Cancel = true;
             this.Hide();
-            Debug.WriteLine("[ExportViewsWindow] Window hidden (singleton reuse)");
+            Debug.WriteLine("[_3DExportViews_Form] Window hidden (singleton reuse)");
         }
     }
 

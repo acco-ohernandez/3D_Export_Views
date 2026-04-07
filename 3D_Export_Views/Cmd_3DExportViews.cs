@@ -8,7 +8,7 @@ namespace _3D_Export_Views
     [Transaction(TransactionMode.Manual)]
     public class Cmd_3DExportViews : IExternalCommand
     {
-        private static ExportViewsWindow _window;
+        private static _3DExportViews_Form _window;
         private static ExternalEvent _createEvent;
         private static CreateViewsHandler _createHandler;
         private static ExternalEvent _activateEvent;
@@ -88,7 +88,7 @@ namespace _3D_Export_Views
             _createHandler.ViewFamilyTypeId = viewFamilyTypeId;
 
             // Create and show the modeless window
-            _window = new ExportViewsWindow(
+            _window = new _3DExportViews_Form(
                 _createEvent,
                 _createHandler,
                 _activateEvent,
