@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37027.9 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "_3D_Export_Views", "3D_Export_Views\_3D_Export_Views.csproj", "{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug R20|Any CPU = Debug R20|Any CPU
+		Debug R21|Any CPU = Debug R21|Any CPU
+		Debug R22|Any CPU = Debug R22|Any CPU
+		Debug R23|Any CPU = Debug R23|Any CPU
+		Debug R24|Any CPU = Debug R24|Any CPU
+		Debug R25|Any CPU = Debug R25|Any CPU
+		Debug R26|Any CPU = Debug R26|Any CPU
+		Release R20|Any CPU = Release R20|Any CPU
+		Release R21|Any CPU = Release R21|Any CPU
+		Release R22|Any CPU = Release R22|Any CPU
+		Release R23|Any CPU = Release R23|Any CPU
+		Release R24|Any CPU = Release R24|Any CPU
+		Release R25|Any CPU = Release R25|Any CPU
+		Release R26|Any CPU = Release R26|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Debug R20|Any CPU.ActiveCfg = Debug R20|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Debug R20|Any CPU.Build.0 = Debug R20|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Debug R21|Any CPU.ActiveCfg = Debug R21|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Debug R21|Any CPU.Build.0 = Debug R21|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Debug R22|Any CPU.ActiveCfg = Debug R22|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Debug R22|Any CPU.Build.0 = Debug R22|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Debug R23|Any CPU.ActiveCfg = Debug R23|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Debug R23|Any CPU.Build.0 = Debug R23|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Debug R24|Any CPU.ActiveCfg = Debug R24|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Debug R24|Any CPU.Build.0 = Debug R24|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Debug R25|Any CPU.ActiveCfg = Debug R25|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Debug R25|Any CPU.Build.0 = Debug R25|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Debug R26|Any CPU.ActiveCfg = Debug R26|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Debug R26|Any CPU.Build.0 = Debug R26|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Release R20|Any CPU.ActiveCfg = Release R20|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Release R20|Any CPU.Build.0 = Release R20|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Release R21|Any CPU.ActiveCfg = Release R21|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Release R21|Any CPU.Build.0 = Release R21|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Release R22|Any CPU.ActiveCfg = Release R22|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Release R22|Any CPU.Build.0 = Release R22|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Release R23|Any CPU.ActiveCfg = Release R23|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Release R23|Any CPU.Build.0 = Release R23|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Release R24|Any CPU.ActiveCfg = Release R24|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Release R24|Any CPU.Build.0 = Release R24|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Release R25|Any CPU.ActiveCfg = Release R25|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Release R25|Any CPU.Build.0 = Release R25|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Release R26|Any CPU.ActiveCfg = Release R26|Any CPU
+		{9AEB0FC9-EFD5-4532-BACF-EE7F9EE76459}.Release R26|Any CPU.Build.0 = Release R26|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DA4168C7-6577-4BDA-AE46-D30AB22B6567}
+	EndGlobalSection
+EndGlobal

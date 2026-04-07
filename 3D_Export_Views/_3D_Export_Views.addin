@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <!--<AddIn Type="Command">
+    <Text>3D Export Views</Text>
+    <Description>Create 3D isometric views from floor and ceiling plans</Description>
+    <Assembly>_3D_Export_Views\_3D_Export_Views.dll</Assembly>
+    <FullClassName>_3D_Export_Views.Cmd_3DExportViews</FullClassName>
+    <ClientId>1ea9138f-6d5e-453f-b4b7-92cbbf22ef57</ClientId>
+    <VendorId>com.YOUR COMPANY NAME</VendorId>
+    <VendorDescription>YOUR COMPANY NAME, YOUR COMPANY URL</VendorDescription>
+  </AddIn>
+  <AddIn Type="Command">
+    <Text>3D_Export_Views - Command 2</Text>
+    <Description>Some description</Description>
+    <Assembly>_3D_Export_Views\_3D_Export_Views.dll</Assembly>
+    <FullClassName>_3D_Export_Views.Command2</FullClassName>
+    <ClientId>2df430ea-f122-4baa-8a99-63ca339b9654</ClientId>
+    <VendorId>com.YOUR COMPANY NAME</VendorId>
+    <VendorDescription>YOUR COMPANY NAME, YOUR COMPANY URL</VendorDescription>
+  </AddIn>-->
+  <AddIn Type="Application">
+    <Name>_3D_Export_Views</Name>
+    <Assembly>_3D_Export_Views\_3D_Export_Views.dll</Assembly>
+    <FullClassName>_3D_Export_Views.App</FullClassName>
+    <ClientId>261dca3b-c004-4806-ac90-0856841a5eea</ClientId>
+    <VendorId>com.YOUR COMPANY NAME</VendorId>
+    <VendorDescription>YOUR COMPANY NAME, YOUR COMPANY URL</VendorDescription>
+  </AddIn>
+</RevitAddIns>

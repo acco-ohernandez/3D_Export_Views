@@ -1,0 +1,103 @@
+<Window x:Class="_3D_Export_Views.Views.ExportViewsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="3D Export Views"
+        Width="450" Height="650"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize">
+
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Search / Filter -->
+        <TextBlock Grid.Row="0" Text="Select Floor/Ceiling Plans:" FontWeight="SemiBold" Margin="0,0,0,4"/>
+        <TextBox Grid.Row="1" x:Name="tbSearch"
+                 TextChanged="TbSearch_TextChanged"
+                 Margin="0,0,0,4">
+            <TextBox.Style>
+                <Style TargetType="TextBox">
+                    <Style.Triggers>
+                        <Trigger Property="Text" Value="">
+                            <Setter Property="Background">
+                                <Setter.Value>
+                                    <VisualBrush AlignmentX="Left" AlignmentY="Center" Stretch="None">
+                                        <VisualBrush.Visual>
+                                            <Label Content="Search views..." Foreground="Gray" Padding="4,0,0,0"/>
+                                        </VisualBrush.Visual>
+                                    </VisualBrush>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBox.Style>
+        </TextBox>
+
+        <!-- Views ListBox -->
+        <ListBox Grid.Row="2" x:Name="lbViews"
+                 SelectionMode="Extended"
+                 DisplayMemberPath="Name"
+                 Margin="0,0,0,4"/>
+
+        <!-- Select All / Deselect All -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,8">
+            <Button Content="Select All" Click="BtnSelectAll_Click" Padding="8,2" Margin="0,0,8,0"/>
+            <Button Content="Deselect All" Click="BtnDeselectAll_Click" Padding="8,2"/>
+        </StackPanel>
+
+        <!-- Discipline -->
+        <TextBlock Grid.Row="4" Text="Discipline:" FontWeight="SemiBold" Margin="0,0,0,4"/>
+        <ComboBox Grid.Row="5" x:Name="cbDiscipline"
+                  IsEditable="True"
+                  Margin="0,0,0,8"/>
+
+        <!-- View Template -->
+        <TextBlock Grid.Row="6" Text="View Template:" FontWeight="SemiBold" Margin="0,0,0,4"/>
+        <ComboBox Grid.Row="7" x:Name="cbTemplate"
+                  DisplayMemberPath="Name"
+                  Margin="0,0,0,8"/>
+
+        <!-- Create Button -->
+        <Button Grid.Row="8" x:Name="btnCreate" Content="Create"
+                Click="BtnCreate_Click"
+                Padding="12,6"
+                HorizontalAlignment="Left"
+                Margin="0,0,0,8"/>
+
+        <!-- Results Section -->
+        <GroupBox Grid.Row="9" Header="Results" Margin="0,0,0,0">
+            <ListBox x:Name="lbResults"
+                     BorderThickness="0"
+                     MouseDoubleClick="LbResults_MouseDoubleClick">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock>
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="Green"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Success}" Value="False">
+                                            <Setter Property="Foreground" Value="Red"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                            <Run Text="{Binding DisplayText, Mode=OneWay}"/>
+                        </TextBlock>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </GroupBox>
+    </Grid>
+</Window>
